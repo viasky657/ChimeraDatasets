@@ -1,0 +1,40 @@
+import json
+
+# Input and output file paths
+input_file = ".../datasets/languages_and_audio/train_last/Open01-SFT.jsonl"
+output_file = ".../datasets/languages_and_audio/train_last/converted_Open01-SFT.jsonl"
+
+def extract_question_and_steps(prompt, output):
+    """
+    Extracts question, steps, and final answer from prompt and output.
+    Adjust parsing logic based on structure of prompt and output.
+    """
+    
+    # Assuming prompt contains the question explicitly
+    question = prompt.strip()
+    
+    # Splitting steps and answer from output
+    output_lines = output.strip().split("\n")
+    steps = output_lines[:-1]  # All lines except the last one as reasoning steps
+    answer = output_lines[-1] if output_lines else ""
+    
+    return question, steps, answer
+
+# Process the dataset
+with open(input_file, "r", encoding="utf-8") as infile, open(output_file, "w", encoding="utf-8") as outfile:
+    for line in infile:
+        data = json.loads(line)
+        prompt = data.get("prompt", "")
+        output = data.get("output", "")
+        
+        question, steps, answer = extract_question_and_steps(prompt, output)
+        
+        new_format = {
+            "question": question,
+            "steps": steps,
+            "answer": answer
+        }
+        
+        outfile.write(json.dumps(new_format) + "\n")
+
+print("Conversion complete. Processed data saved to:", output_file)
